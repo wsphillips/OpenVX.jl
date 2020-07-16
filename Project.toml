@@ -1,0 +1,7 @@
+name = "OpenVX"
+uuid = "7fa8845b-28a6-4ac1-b09a-9431867ec672"
+authors = ["wikphi "]
+version = "0.1.0"
+
+[deps]
+CEnum = "fa961155-64e5-5f13-b03f-caf6b980ea82"
