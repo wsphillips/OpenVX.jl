@@ -67,9 +67,12 @@ struct vx_imagepatch_addressing_t
     scale_y::vx_uint32
     step_x::vx_uint32
     step_y::vx_uint32
+    function vx_imagepatch_addressing_t(;dim_x = 0, dim_y = 0, stride_x = 0, stride_y = 0, scale_x = 0, scale_y = 0, step_x = 0, step_y = 0)
+        new(dim_x, dim_y, stride_x, stride_y, scale_x, scale_y, step_x, step_y)
+    end
 end
 
-const VX_IMAGEPATCH_ADDR_INIT = vx_imagepatch_addressing_t(0, 0, 0, 0, 0, 0, 0, 0)
+const IMAGEPATCH_ADDR_INIT = vx_imagepatch_addressing_t()
 
 struct vx_perf_t
     tmp::vx_uint64
@@ -82,7 +85,7 @@ struct vx_perf_t
     max::vx_uint64
 end
 
-const VX_PERF_INIT = vx_perf_t(0, 0, 0, 0, 0, 0, 0, 0)
+const PERF_INIT = vx_perf_t(0, 0, 0, 0, 0, 0, 0, 0)
 
 struct vx_hough_lines_p_t
     rho::vx_float32
@@ -155,6 +158,10 @@ struct vx_pixel_value_t
     U32::vx_uint32
     S32::vx_int32
     reserved::NTuple{16, vx_uint8}
+    function vx_pixel_value_t(;RGB=(0,0,0), RGBX=(0,0,0,0), YUV=(0,0,0), U8=0, U16=0, S16=0,
+                              U32=0, S32=0, reserved=(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0))
+        new(RGB, RGBX, YUV, U8, U16, S16, U32, S32, reserved)
+    end
 end
 
 struct vx_hog_t

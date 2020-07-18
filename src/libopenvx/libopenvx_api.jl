@@ -47,11 +47,11 @@ function SetImmediateModeTarget(context::vx_context, target_enum::vx_enum, targe
     ccall((:vxSetImmediateModeTarget, :libopenvx), vx_status, (vx_context, vx_enum, Cstring), context, target_enum, target_string)
 end
 
-function CreateImage(context::vx_context, width::vx_uint32, height::vx_uint32, color::vx_df_image)
-    ccall((:vxCreateImage, :libopenvx), vx_image, (vx_context, vx_uint32, vx_uint32, vx_df_image), context, width, height, color)
+function CreateImage(context::vx_context, width::Integer, height::Integer, color::vx_df_image_e)
+    ccall((:vxCreateImage, :libopenvx), vx_image, (vx_context, vx_uint32, vx_uint32, vx_df_image_e), context, width, height, color)
 end
 
-function CreateImageFromROI(img::vx_image, rect::Ref{vx_rectangle_t})
+function CreateImageFromROI(img::vx_image, rect::vx_rectangle_t)
     ccall((:vxCreateImageFromROI, :libopenvx), vx_image, (vx_image, Ref{vx_rectangle_t}), img, rect)
 end
 
@@ -63,8 +63,8 @@ function CreateVirtualImage(graph::vx_graph, width::vx_uint32, height::vx_uint32
     ccall((:vxCreateVirtualImage, :libopenvx), vx_image, (vx_graph, vx_uint32, vx_uint32, vx_df_image), graph, width, height, color)
 end
 
-function CreateImageFromHandle(context::vx_context, color::vx_df_image, addrs::Ref{vx_imagepatch_addressing_t}, ptrs::Ref{Ptr{Cvoid}}, memory_type::vx_enum)
-    ccall((:vxCreateImageFromHandle, :libopenvx), vx_image, (vx_context, vx_df_image, Ref{vx_imagepatch_addressing_t}, Ref{Ptr{Cvoid}}, vx_enum), context, color, addrs, ptrs, memory_type)
+function CreateImageFromHandle(context::vx_context, color::vx_df_image_e, addrs::vx_imagepatch_addressing_t, ptrs::Vector{UInt8}, memory_type)
+    ccall((:vxCreateImageFromHandle, :libopenvx), vx_image, (vx_context, UInt32, Ref{vx_imagepatch_addressing_t}, Ref{UInt8}, vx_enum), context, color, addrs, ptrs, memory_type)
 end
 
 function SwapImageHandle(image::vx_image, new_ptrs::Ref{Ptr{Cvoid}}, prev_ptrs::Ref{Ptr{Cvoid}}, num_planes::vx_size)
@@ -79,7 +79,7 @@ function SetImageAttribute(image::vx_image, attribute::vx_enum, ptr::Ref{Cvoid},
     ccall((:vxSetImageAttribute, :libopenvx), vx_status, (vx_image, vx_enum, Ref{Cvoid}, vx_size), image, attribute, ptr, size)
 end
 
-function SetImagePixelValues(image::vx_image, pixel_value::Ref{vx_pixel_value_t})
+function SetImagePixelValues(image::vx_image, pixel_value::vx_pixel_value_t)
     ccall((:vxSetImagePixelValues, :libopenvx), vx_status, (vx_image, Ref{vx_pixel_value_t}), image, pixel_value)
 end
 
@@ -99,12 +99,12 @@ function GetValidRegionImage(image::vx_image, rect::Ref{vx_rectangle_t})
     ccall((:vxGetValidRegionImage, :libopenvx), vx_status, (vx_image, Ref{vx_rectangle_t}), image, rect)
 end
 
-function CopyImagePatch(image::vx_image, image_rect::Ref{vx_rectangle_t}, image_plane_index::vx_uint32, user_addr::Ref{vx_imagepatch_addressing_t}, user_ptr::Ref{Cvoid}, usage::vx_enum, user_mem_type::vx_enum)
-    ccall((:vxCopyImagePatch, :libopenvx), vx_status, (vx_image, Ref{vx_rectangle_t}, vx_uint32, Ref{vx_imagepatch_addressing_t}, Ref{Cvoid}, vx_enum, vx_enum), image, image_rect, image_plane_index, user_addr, user_ptr, usage, user_mem_type)
+function CopyImagePatch(image::vx_image, image_rect, image_plane_index::Integer, user_addr::vx_imagepatch_addressing_t, user_ptr::AbstractArray{T,N}, usage, user_mem_type) where {T,N}
+    ccall((:vxCopyImagePatch, :libopenvx), vx_status, (vx_image, Ref{vx_rectangle_t}, vx_uint32, Ref{vx_imagepatch_addressing_t}, Ref{T}, vx_enum, vx_enum), image, image_rect, image_plane_index, user_addr, user_ptr, usage, user_mem_type)
 end
 
-function MapImagePatch(image::vx_image, rect::Ref{vx_rectangle_t}, plane_index::vx_uint32, map_id::Ref{vx_map_id}, addr::Ref{vx_imagepatch_addressing_t}, ptr::Ref{Ptr{Cvoid}}, usage::vx_enum, mem_type::vx_enum, flags::vx_uint32)
-    ccall((:vxMapImagePatch, :libopenvx), vx_status, (vx_image, Ref{vx_rectangle_t}, vx_uint32, Ref{vx_map_id}, Ref{vx_imagepatch_addressing_t}, Ref{Ptr{Cvoid}}, vx_enum, vx_enum, vx_uint32), image, rect, plane_index, map_id, addr, ptr, usage, mem_type, flags)
+function MapImagePatch(image::vx_image, rect::vx_rectangle_t, plane_index::Integer, map_id::Ref{vx_map_id}, addr::Ref{vx_imagepatch_addressing_t}, ptr::Ref{Ptr{T}}, usage, mem_type, flags::Integer = 0) where {T}
+    ccall((:vxMapImagePatch, :libopenvx), vx_status, (vx_image, Ref{vx_rectangle_t}, vx_uint32, Ref{vx_map_id}, Ref{vx_imagepatch_addressing_t}, Ref{Ptr{T}}, vx_enum, vx_enum, vx_uint32), image, rect, plane_index, map_id, addr, ptr, usage, mem_type, flags)
 end
 
 function UnmapImagePatch(image::vx_image, map_id::vx_map_id)
