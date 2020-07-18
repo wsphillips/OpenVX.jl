@@ -4,7 +4,7 @@ function CreateContext()
 end
 
 function ReleaseContext(context::Ref{vx_context})
-    ccall((:vxReleaseContext, :libopenvx), vx_status, (Ref{vx_context},), context)
+    ccall((:vxReleaseContext, :libopenvx), vx_status, (Ptr{vx_context},), context)
 end
 
 function GetContext(reference::vx_reference)
@@ -59,7 +59,7 @@ function CreateUniformImage(context::vx_context, width::vx_uint32, height::vx_ui
     ccall((:vxCreateUniformImage, :libopenvx), vx_image, (vx_context, vx_uint32, vx_uint32, vx_df_image, Ref{vx_pixel_value_t}), context, width, height, color, value)
 end
 
-function CreateVirtualImage(graph::vx_graph, width::vx_uint32, height::vx_uint32, color::vx_df_image)
+function CreateVirtualImage(graph::vx_graph, width::Integer, height::Integer, color::vx_df_image_e)
     ccall((:vxCreateVirtualImage, :libopenvx), vx_image, (vx_graph, vx_uint32, vx_uint32, vx_df_image), graph, width, height, color)
 end
 
@@ -84,7 +84,7 @@ function SetImagePixelValues(image::vx_image, pixel_value::vx_pixel_value_t)
 end
 
 function ReleaseImage(image::Ref{vx_image})
-    ccall((:vxReleaseImage, :libopenvx), vx_status, (Ref{vx_image},), image)
+    ccall((:vxReleaseImage, :libopenvx), vx_status, (Ptr{vx_image},), image)
 end
 
 function FormatImagePatchAddress1d(ptr::Ref{Cvoid}, index::vx_uint32, addr::Ref{vx_imagepatch_addressing_t})
@@ -459,7 +459,7 @@ function CreateMatrixFromPatternAndOrigin(context::vx_context, pattern::vx_enum,
     ccall((:vxCreateMatrixFromPatternAndOrigin, :libopenvx), vx_matrix, (vx_context, vx_enum, vx_size, vx_size, vx_size, vx_size), context, pattern, columns, rows, origin_col, origin_row)
 end
 
-function CreateConvolution(context::vx_context, columns::vx_size, rows::vx_size)
+function CreateConvolution(context::vx_context, columns::Integer, rows::Integer)
     ccall((:vxCreateConvolution, :libopenvx), vx_convolution, (vx_context, vx_size, vx_size), context, columns, rows)
 end
 
@@ -475,12 +475,12 @@ function QueryConvolution(conv::vx_convolution, attribute::vx_enum, ptr::Ref{Cvo
     ccall((:vxQueryConvolution, :libopenvx), vx_status, (vx_convolution, vx_enum, Ref{Cvoid}, vx_size), conv, attribute, ptr, size)
 end
 
-function SetConvolutionAttribute(conv::vx_convolution, attribute::vx_enum, ptr::Ref{Cvoid}, size::vx_size)
-    ccall((:vxSetConvolutionAttribute, :libopenvx), vx_status, (vx_convolution, vx_enum, Ref{Cvoid}, vx_size), conv, attribute, ptr, size)
+function SetConvolutionAttribute(conv::vx_convolution, attribute, ptr::Ref{T}, size::Integer) where {T}
+    ccall((:vxSetConvolutionAttribute, :libopenvx), vx_status, (vx_convolution, vx_enum, Ref{T}, vx_size), conv, attribute, ptr, size)
 end
 
-function CopyConvolutionCoefficients(conv::vx_convolution, user_ptr::Ref{Cvoid}, usage::vx_enum, user_mem_type::vx_enum)
-    ccall((:vxCopyConvolutionCoefficients, :libopenvx), vx_status, (vx_convolution, Ref{Cvoid}, vx_enum, vx_enum), conv, user_ptr, usage, user_mem_type)
+function CopyConvolutionCoefficients(conv::vx_convolution, user_ptr::AbstractArray{T,N}, usage, user_mem_type) where {T,N}
+    ccall((:vxCopyConvolutionCoefficients, :libopenvx), vx_status, (vx_convolution, Ref{T}, vx_enum, vx_enum), conv, user_ptr, usage, user_mem_type)
 end
 
 function CreatePyramid(context::vx_context, levels::vx_size, scale::vx_float32, width::vx_uint32, height::vx_uint32, format::vx_df_image)
@@ -627,7 +627,7 @@ function ColorConvertNode(graph::vx_graph, input::vx_image, output::vx_image)
     ccall((:vxColorConvertNode, :libopenvx), vx_node, (vx_graph, vx_image, vx_image), graph, input, output)
 end
 
-function ChannelExtractNode(graph::vx_graph, input::vx_image, channel::vx_enum, output::vx_image)
+function ChannelExtractNode(graph::vx_graph, input::vx_image, channel, output::vx_image)
     ccall((:vxChannelExtractNode, :libopenvx), vx_node, (vx_graph, vx_image, vx_enum, vx_image), graph, input, channel, output)
 end
 
