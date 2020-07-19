@@ -6,7 +6,7 @@ Loads an image from file and maps it to an OpenVX image object
 """
 function image_from_file(filename::String, width, height)
 
-    raw_image = load("assets/airplane.ppm").parent.parent
+    raw_image = load(filename).parent.parent
     vx_input_image = VX.CreateImage(ctx, width, height, VX.DF_IMAGE_RGB)
 
     image_region = Ref{VX.vx_rectangle_t}()
@@ -82,9 +82,9 @@ function make_filter_graph(ctx, input::VX.vx_image, output::VX.vx_image)
     end
     
     # 3x3 box filtetr coefficients (transposed for row major storage)
-    scharr_coeffs = collect(Int16[3  0 -3
-                                  10 0 -10
-                                  3  0 -3]')
+    scharr_coeffs = Int16[3  0 -3
+                          10 0 -10
+                          3  0 -3]
     #scale for convolution
     scale = Ref{UInt32}(2)
     # Create convolution object, set convolution coefficients and scale
@@ -124,4 +124,4 @@ image = image_from_file(filename, width, height)
 output = VX.CreateImage(ctx, width, height, VX.DF_IMAGE_RGB)
 graph = make_filter_graph(ctx, image, output)
 VX.ProcessGraph(graph)
-file_from_image(output, "airplane_out.ppm", width, height)
+file_from_image(output, "airplane_out.jpg", width, height)
