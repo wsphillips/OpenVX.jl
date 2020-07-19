@@ -99,11 +99,11 @@ function GetValidRegionImage(image::vx_image, rect::Ref{vx_rectangle_t})
     ccall((:vxGetValidRegionImage, :libopenvx), vx_status, (vx_image, Ref{vx_rectangle_t}), image, rect)
 end
 
-function CopyImagePatch(image::vx_image, image_rect, image_plane_index::Integer, user_addr::vx_imagepatch_addressing_t, user_ptr::AbstractArray{T,N}, usage, user_mem_type) where {T,N}
+function CopyImagePatch(image::vx_image, image_rect, image_plane_index::Integer, user_addr, user_ptr::AbstractArray{T,N}, usage, user_mem_type) where {T,N}
     ccall((:vxCopyImagePatch, :libopenvx), vx_status, (vx_image, Ref{vx_rectangle_t}, vx_uint32, Ref{vx_imagepatch_addressing_t}, Ref{T}, vx_enum, vx_enum), image, image_rect, image_plane_index, user_addr, user_ptr, usage, user_mem_type)
 end
 
-function MapImagePatch(image::vx_image, rect::vx_rectangle_t, plane_index::Integer, map_id::Ref{vx_map_id}, addr::Ref{vx_imagepatch_addressing_t}, ptr::Ref{Ptr{T}}, usage, mem_type, flags::Integer = 0) where {T}
+function MapImagePatch(image::vx_image, rect::vx_rectangle_t, plane_index::Integer, map_id::Ref{vx_map_id}, addr::Ref{vx_imagepatch_addressing_t}, ptr::Ref{Ptr{T}}, usage, mem_type, flags) where {T}
     ccall((:vxMapImagePatch, :libopenvx), vx_status, (vx_image, Ref{vx_rectangle_t}, vx_uint32, Ref{vx_map_id}, Ref{vx_imagepatch_addressing_t}, Ref{Ptr{T}}, vx_enum, vx_enum, vx_uint32), image, rect, plane_index, map_id, addr, ptr, usage, mem_type, flags)
 end
 
@@ -228,7 +228,7 @@ function SetNodeAttribute(node::vx_node, attribute::vx_enum, ptr::Ref{Cvoid}, si
 end
 
 function ReleaseNode(node::Ref{vx_node})
-    ccall((:vxReleaseNode, :libopenvx), vx_status, (Ref{vx_node},), node)
+    ccall((:vxReleaseNode, :libopenvx), vx_status, (Ptr{vx_node},), node)
 end
 
 function RemoveNode(node::Ref{vx_node})
@@ -423,8 +423,8 @@ function ReleaseThreshold(thresh::Ref{vx_threshold})
     ccall((:vxReleaseThreshold, :libopenvx), vx_status, (Ref{vx_threshold},), thresh)
 end
 
-function SetThresholdAttribute(thresh::vx_threshold, attribute::vx_enum, ptr::Ref{Cvoid}, size::vx_size)
-    ccall((:vxSetThresholdAttribute, :libopenvx), vx_status, (vx_threshold, vx_enum, Ref{Cvoid}, vx_size), thresh, attribute, ptr, size)
+function SetThresholdAttribute(thresh::vx_threshold, attribute, ptr::Ref{T}, size::Integer) where {T}
+    ccall((:vxSetThresholdAttribute, :libopenvx), vx_status, (vx_threshold, vx_enum, Ref{T}, vx_size), thresh, attribute, ptr, size)
 end
 
 function QueryThreshold(thresh::vx_threshold, attribute::vx_enum, ptr::Ref{Cvoid}, size::vx_size)
@@ -787,7 +787,7 @@ function ConvertDepthNode(graph::vx_graph, input::vx_image, output::vx_image, po
     ccall((:vxConvertDepthNode, :libopenvx), vx_node, (vx_graph, vx_image, vx_image, vx_enum, vx_scalar), graph, input, output, policy, shift)
 end
 
-function CannyEdgeDetectorNode(graph::vx_graph, input::vx_image, hyst::vx_threshold, gradient_size::vx_int32, norm_type::vx_enum, output::vx_image)
+function CannyEdgeDetectorNode(graph::vx_graph, input::vx_image, hyst::vx_threshold, gradient_size::Integer, norm_type, output::vx_image)
     ccall((:vxCannyEdgeDetectorNode, :libopenvx), vx_node, (vx_graph, vx_image, vx_threshold, vx_int32, vx_enum, vx_image), graph, input, hyst, gradient_size, norm_type, output)
 end
 
@@ -1287,7 +1287,7 @@ function GetRemapPoint(table::vx_remap, dst_x::vx_uint32, dst_y::vx_uint32, src_
     ccall((:vxGetRemapPoint, :libopenvx), vx_status, (vx_remap, vx_uint32, vx_uint32, Ref{vx_float32}, Ref{vx_float32}), table, dst_x, dst_y, src_x, src_y)
 end
 
-function CreateThreshold(c::vx_context, thresh_type::vx_enum, data_type::vx_enum)
+function CreateThreshold(c::vx_context, thresh_type, data_type)
     ccall((:vxCreateThreshold, :libopenvx), vx_threshold, (vx_context, vx_enum, vx_enum), c, thresh_type, data_type)
 end
 
